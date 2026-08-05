@@ -3,10 +3,12 @@ import argparse, requests
 
 #argparse
 
-# How to use: python3 caching-proxy.py num
+# How to use: python3 caching-proxy.py --port <number> --origin <url>
+# Example: python3 caching-proxy.py --port 3000 --origin http://dummyjson.com
+
 
 # 1. Create the parser
-parser = argparse.ArgumentParser(description="caching-proxy")
+parser = argparse.ArgumentParser(description="caching-proxy")   
 
 # 2. Add argument
 #parser.add_argument("name", help="the name of the person to greet")
@@ -16,8 +18,6 @@ parser.add_argument("--origin", type=str, help="URL of the server to which the r
 
 # 3. Parse the arguments
 args = parser.parse_args()
-
-#print(f"Hi, {args.name}")
 
 
 
@@ -34,6 +34,12 @@ def home():
     response = requests.get(args.origin)
 
     return response.text
+
+@app.route("/<path:subpage>")
+def subpage(subpage):
+    sub_url = requests.get(args.origin + "/" + subpage)
+    return sub_url.text
+
 
 
 if __name__ == "__main__":
