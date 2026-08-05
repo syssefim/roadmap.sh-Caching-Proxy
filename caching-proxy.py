@@ -1,5 +1,5 @@
 from flask import Flask
-import argparse, requests
+import argparse, requests, redis
 
 #argparse
 
@@ -19,10 +19,34 @@ parser.add_argument("--origin", type=str, help="URL of the server to which the r
 # 3. Parse the arguments
 args = parser.parse_args()
 
+PORT = args.port
+URL = args.origin
 
 
 
+#redis
 
+# 1. Connect to Redis
+r = redis.Redis(host='localhost', port=6379, db=0)
+
+def get_response(url=""):
+    cache_key = URL + url
+
+    # 2. Check the Cache
+    cached_data = r.get(cache_key)
+    
+    if cached_data:
+        print("✅ X-Cache: HIT")
+        return json.loads(cached_data)
+        
+    print("❌ X-Cache: MISS")
+
+    response = requests.get(args.origin)
+    response_data = response.text
+
+    r.set(cache_key, json.dumps(user_data), ex=86400)
+
+    return response_data
 
 
 #flask
@@ -31,16 +55,16 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    response = requests.get(args.origin)
+    response = requests.get(URL)
 
     return response.text
 
 @app.route("/<path:subpage>")
 def subpage(subpage):
-    sub_url = requests.get(args.origin + "/" + subpage)
+    sub_url = requests.get(URL + "/" + subpage)
     return sub_url.text
 
 
 
 if __name__ == "__main__":
-    app.run(port=args.port)
+    app.run(port=PORT)
