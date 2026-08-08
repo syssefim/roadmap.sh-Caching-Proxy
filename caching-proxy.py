@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(description="caching-proxy")
 # 2. Add argument
 #parser.add_argument("name", help="the name of the person to greet")
 parser.add_argument("--port", type=int, default=3000, help="the port to run flask on")
-parser.add_argument("--origin", type=str, default="https://github.com/", help="URL of the server to which the requests will be forwarded")
+parser.add_argument("--origin", type=str, default="https://github.com/syssefim", help="URL of the server to which the requests will be forwarded")
 
 
 # 3. Parse the arguments
