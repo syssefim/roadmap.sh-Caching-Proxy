@@ -1,0 +1,11 @@
+sqlite3 cache.db
+
+
+
+.tables
+.schema table_name
+
+.exit
+
+
+To exit ..> type: ; + Enter

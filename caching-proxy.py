@@ -24,6 +24,24 @@ URL = args.origin
 
 
 
+#sqlite
+
+# Connect to a database file (or create it)
+conn = sqlite3.connect('cache.db')
+
+# Create a cursor object to interact with the database
+cursor = conn.cursor()
+
+# Create a table if it doesn't already exist
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS pages (
+    origin_url TEXT,
+    url_path TEXT,
+    headers TEXT,
+    body TEXT,
+    PRIMARY KEY (origin_url, url_path)
+    )
+''')
 
 
 
@@ -31,14 +49,25 @@ URL = args.origin
 
 app = Flask(__name__)
 
+# @app.route("/")
+# def home():
+#     response = requests.get(URL)
+
+    
+
+#     return response.text
+
+# @app.route("/<path:subpage>")
+# def subpage(subpage):
+#     sub_url = requests.get(URL + "/" + subpage)
+#     return sub_url.text
+
+
 @app.route("/")
-def home():
+@app.route("/<path:subpage>")
+def page(subpage=""):
     response = requests.get(URL)
 
-    return response.text
-
-@app.route("/<path:subpage>")
-def subpage(subpage):
     sub_url = requests.get(URL + "/" + subpage)
     return sub_url.text
 
