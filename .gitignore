@@ -1,2 +1,9 @@
 cache.db
-scratch.txt
+scratch_pad.txt
+
+__pycache__/
+*.pyc
+
+*.egg-info/
+dist/
+build/
