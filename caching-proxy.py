@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser(description="caching-proxy")
 # 2. Add argument
 #parser.add_argument("name", help="the name of the person to greet")
 parser.add_argument("--port", type=int, default=3000, help="the port to run flask on")
-parser.add_argument("--origin", type=str, default="https://github.com/syssefim", help="URL of the server to which the requests will be forwarded")
+parser.add_argument("--origin", type=str, default="https://github.com", help="URL of the server to which the requests will be forwarded")
 
 
 # 3. Parse the arguments
@@ -24,7 +24,7 @@ URL = args.origin
 
 
 
-#sqlite
+
 
 
 
@@ -33,19 +33,6 @@ URL = args.origin
 #flask
 
 app = Flask(__name__)
-
-# @app.route("/")
-# def home():
-#     response = requests.get(URL)
-
-    
-
-#     return response.text
-
-# @app.route("/<path:subpage>")
-# def subpage(subpage):
-#     sub_url = requests.get(URL + "/" + subpage)
-#     return sub_url.text
 
 
 @app.route("/")
@@ -64,26 +51,28 @@ def page(subpage=""):
         response TEXT
         )
     ''')
-    #check cache
-    cursor.execute("SELECT * FROM pages WHERE url = ?", (URL + "/" + subpage,))
 
+    # Check cache
+    cursor.execute(
+        "SELECT * FROM pages WHERE url = ?", 
+        (URL + ("" if URL.endswith("/") else "/") + subpage,)
+    )
+
+    
     row = cursor.fetchone()
 
     if row:
-        print("in cache")
-        return "in cache"
+        print("X-Cache: HIT")
+        return "X-Cache: HIT"
     else:
-        print("not in cache :(")
-        sub_url = requests.get(URL + "/" + subpage)
+        print("X-Cache: MISS")
+        sub_url = requests.get(URL + ("" if URL.endswith("/") else "/") + subpage)
         cursor.execute(
             "INSERT OR REPLACE INTO pages (url, response) VALUES (?, ?)",
-            (URL + '/' + subpage, sub_url.text)
+            (URL + ("" if URL.endswith("/") else "/") + subpage, sub_url.text)
         )
         conn.commit()
         return sub_url.text
-
-    #sub_url = requests.get(URL + "/" + subpage)
-    return sub_url.text
 
 
 
