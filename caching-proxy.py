@@ -26,22 +26,7 @@ URL = args.origin
 
 #sqlite
 
-# Connect to a database file (or create it)
-conn = sqlite3.connect('cache.db')
 
-# Create a cursor object to interact with the database
-cursor = conn.cursor()
-
-# Create a table if it doesn't already exist
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS pages (
-    origin_url TEXT,
-    url_path TEXT,
-    headers TEXT,
-    body TEXT,
-    PRIMARY KEY (origin_url, url_path)
-    )
-''')
 
 
 
@@ -66,9 +51,38 @@ app = Flask(__name__)
 @app.route("/")
 @app.route("/<path:subpage>")
 def page(subpage=""):
-    response = requests.get(URL)
+    # Connect to a database file (or create it)
+    conn = sqlite3.connect('cache.db')
 
-    sub_url = requests.get(URL + "/" + subpage)
+    # Create a cursor object to interact with the database
+    cursor = conn.cursor()
+
+    # Create a table if it doesn't already exist
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS pages (
+        url TEXT,
+        response TEXT
+        )
+    ''')
+    #check cache
+    cursor.execute("SELECT * FROM pages WHERE url = ?", (URL + "/" + subpage,))
+
+    row = cursor.fetchone()
+
+    if row:
+        print("in cache")
+        return "in cache"
+    else:
+        print("not in cache :(")
+        sub_url = requests.get(URL + "/" + subpage)
+        cursor.execute(
+            "INSERT OR REPLACE INTO pages (url, response) VALUES (?, ?)",
+            (URL + '/' + subpage, sub_url.text)
+        )
+        conn.commit()
+        return sub_url.text
+
+    #sub_url = requests.get(URL + "/" + subpage)
     return sub_url.text
 
 
