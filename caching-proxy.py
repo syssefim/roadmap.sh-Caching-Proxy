@@ -14,14 +14,14 @@ parser = argparse.ArgumentParser(description="caching-proxy")
 parser.add_argument(
     "--port",
     type=int,
-    default=3000,
+    default=None,
     help="Port on which the proxy server will run"
 )
 
 parser.add_argument(
     "--origin",
     type=str,
-    default="https://github.com/syssefim",
+    default=None,
     help="The origin URL to forward requests to"
 )
 
@@ -36,17 +36,19 @@ args = parser.parse_args()
 
 # 4. Handle the input logic
 if args.clear_cache:
+    if args.port is not None or args.origin is not None:
+        parser.error("--clear-cache cannot be used with --port or --origin")
+
     print("Clearing proxy db cache...")
 
     if os.path.exists(CACHE_DB_NAME):
         os.remove(CACHE_DB_NAME)
 
     sys.exit()
-
-    
-
-PORT = args.port
-URL = args.origin
+else:
+    # Apply defaults if the arguments were not provided
+    PORT = args.port if args.port is not None else 3000
+    URL = args.origin if args.origin is not None else "https://github.com/syssefim"
 
 
 
@@ -66,7 +68,7 @@ app = Flask(__name__)
 @app.route("/")
 @app.route("/<path:subpage>")
 def page(subpage=""):
-    # Connect to a database file (or create it) u
+    # Connect to a database file (or create it)
     conn = sqlite3.connect(CACHE_DB_NAME)
 
     conn.row_factory = sqlite3.Row
