@@ -10,6 +10,7 @@ A CLI tool that starts a caching proxy server. It forwards requests to the actua
 [![Python][Python]][Python-url]
 [![Flask][Flask]][Flask-url]
 [![SQLite][SQLite]][SQLite-url]
+[![Requests][Requests]][Requests-url]
 
 ## 📌 Installation
 1. First, clone the repository and cd into the project:
@@ -69,3 +70,5 @@ caching-proxy --clear-cache
 [Flask-url]: https://flask.palletsprojects.com/
 [SQLite]: https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white
 [SQLite-url]: https://www.sqlite.org/
+[Requests]: https://img.shields.io/badge/Requests-000000?style=for-the-badge&logo=python&logoColor=white
+[Requests-url]: https://requests.readthedocs.io/

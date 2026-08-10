@@ -4,8 +4,8 @@ import argparse, requests, sqlite3, sys, os
 
 #global variable(s)
 CACHE_DB_NAME = "cache.db"
-PORT = 3000
-URL = "https://github.com/"
+PORT = 3000 # default port
+URL = "https://github.com/" #default origin
 
 def main():
     global PORT, URL
@@ -114,12 +114,4 @@ def page(subpage=""):
 
 
 if __name__ == "__main__":
-    #app.run(port=PORT)
-
-    # try:
-    #     main()
-    # except KeyboardInterrupt:
-    #     print("\nOperation cancelled by user...", file=sys.stderr)
-    #     sys.exit(1)
-
     main()
