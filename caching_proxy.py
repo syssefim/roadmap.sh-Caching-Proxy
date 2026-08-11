@@ -99,17 +99,15 @@ def page(subpage=""):
     row = cursor.fetchone()
 
     if row:
-        print("X-Cache: HIT")
-        return row["response"]
+        return row["response"], 200, {"X-Cache": "HIT"}
     else:
-        print("X-Cache: MISS")
         sub_url = requests.get(URL + ("" if URL.endswith("/") else "/") + subpage)
         cursor.execute(
             "INSERT OR REPLACE INTO pages (url, response) VALUES (?, ?)",
             (URL + ("" if URL.endswith("/") else "/") + subpage, sub_url.text)
         )
         conn.commit()
-        return sub_url.text
+        return sub_url.text, 200, {"X-Cache": "MISS"}
 
 
 
