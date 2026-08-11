@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 from flask import Flask
-import argparse, requests, sqlite3, sys, os
+import argparse, requests, sqlite3, sys, os, json
+
 
 #global variable(s)
 CACHE_DB_NAME = "cache.db"
 PORT = 3000 # default port
 URL = "https://github.com/" #default origin
+
 
 def main():
     global PORT, URL
@@ -85,6 +87,8 @@ def page(subpage=""):
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS pages (
         url TEXT PRIMARY KEY,
+        status INTEGER,
+        headers TEXT,
         response TEXT
         )
     ''')
@@ -99,15 +103,29 @@ def page(subpage=""):
     row = cursor.fetchone()
 
     if row:
-        return row["response"], 200, {"X-Cache": "HIT"}
+        headers = json.loads(row["headers"])
+        headers["X-Cache"] = "HIT"
+        print("X-Cache: HIT")
+        return row["response"], row["status"], headers
     else:
-        sub_url = requests.get(URL + ("" if URL.endswith("/") else "/") + subpage)
+        res = requests.get(URL + ("" if URL.endswith("/") else "/") + subpage)
+
+        EXCLUDED_HEADERS = {"content-encoding", "transfer-encoding", "content-length", "connection"}
+
+        headers = {}
+        for k, v in res.headers.items():
+            if k.lower() not in EXCLUDED_HEADERS:
+                headers[k] = v
+
         cursor.execute(
-            "INSERT OR REPLACE INTO pages (url, response) VALUES (?, ?)",
-            (URL + ("" if URL.endswith("/") else "/") + subpage, sub_url.text)
+            "INSERT OR REPLACE INTO pages (url, status, headers, response) VALUES (?, ?, ?, ?)",
+            (URL + ("" if URL.endswith("/") else "/") + subpage, res.status_code, json.dumps(headers), res.text)
         )
         conn.commit()
-        return sub_url.text, 200, {"X-Cache": "MISS"}
+
+        headers["X-Cache"] = "MISS"
+        print("X-Cache: MISS")
+        return res.text, res.status_code, headers
 
 
 
